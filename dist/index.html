@@ -1444,16 +1444,12 @@
       }
     }
 
-    // ดึงงานของฉันจาก Google Sheets
+    // ดึงงานของฉันจาก Google Sheets (ใช้ GET เพื่อความแม่นยำ ไม่ติด CORS/Redirect)
     function syncTasksFromSheets() {
       if (!lineUser.userId) return;
       showToast("กำลังดึงข้อมูลจาก Cloud...", "Syncing...");
 
-      fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "getTasks", userId: lineUser.userId })
-      })
+      fetch(`${GAS_URL}?action=getTasks&userId=${encodeURIComponent(lineUser.userId)}`)
       .then(res => res.json())
       .then(res => {
         if (res.status === 'success' && res.tasks) {
