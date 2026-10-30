@@ -1041,6 +1041,9 @@
 
       <!-- User Profile & Action -->
       <div class="user-profile">
+        <button class="pill-control" style="padding: 8px 12px;" onclick="syncTasksFromSheets()" title="ซิงค์ข้อมูลจาก Cloud">
+          <i data-lucide="refresh-cw" style="width: 15px; color: var(--accent-yellow);"></i>
+        </button>
         <button class="pill-control" style="padding: 8px 12px;" onclick="openTaskModal()" title="เพิ่มแผนงาน">
           <i data-lucide="plus" style="width: 16px; color: var(--accent-orange);"></i>
         </button>
@@ -1444,20 +1447,25 @@
     // ดึงงานของฉันจาก Google Sheets
     function syncTasksFromSheets() {
       if (!lineUser.userId) return;
+      showToast("กำลังดึงข้อมูลจาก Cloud...", "Syncing...");
+
       fetch(GAS_URL, {
         method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: "getTasks", userId: lineUser.userId })
       })
       .then(res => res.json())
       .then(res => {
-        if (res.status === 'success' && res.tasks && res.tasks.length > 0) {
-          // ผสานข้อมูล
+        if (res.status === 'success' && res.tasks) {
           tasks = res.tasks;
           saveToStorage();
           renderAll();
+          showToast("ซิงค์ข้อมูลสำเร็จ! ☁️", `${res.tasks.length} รายการ`);
         }
       })
-      .catch(e => console.log("Sync error:", e));
+      .catch(e => {
+        console.warn("Sync error:", e);
+      });
     }
 
     function saveToStorage() {
